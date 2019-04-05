@@ -1,0 +1,72 @@
+metricbeat.modules:
+
+- module: system
+  metricsets:
+    - cpu
+    - load
+    - core
+    - diskio
+    - filesystem
+    - fsstat
+    - memory
+    - network
+    - process
+    - process_summary
+    - socket
+  enabled: true
+  period: 10s
+  processes: ['.*']
+  cgroups: true
+  process.include_top_n:
+    enabled: true
+    by_cpu: 20
+    by_memory: 20
+
+- module: mysql
+  metricsets: ["status"]
+  hosts: ["tcp(127.0.0.1:3306)/"]
+  username: {{ mysql_root_user }}
+  password: {{ mysql_root_password }}
+
+- module: nginx
+  metricsets: ["stubstatus"]
+  enabled: true
+  period: 10s
+  hosts: ["https://{{ domain }}"]
+
+- module: php_fpm
+  metricsets: ["pool"]
+  period: 10s
+  status_path: "/status"
+  hosts: ["https://{{ domain }}"]
+
+- module: apache
+  metricsets: ["status"]
+  period: 10s
+  hosts: ["https://{{ domain }}:8080"]
+
+
+name: "{{ inventory_hostname }}"
+tags: ["{{ env }}", "lightsail"]
+
+
+processors:
+- add_cloud_metadata: ~
+- add_host_metadata: ~
+
+
+xpack.monitoring.enabled: true
+
+
+output.elasticsearch:
+  hosts: ["{{ elasticsearch_host }}"]
+  username: "{{ elasticsearch_user }}"
+  password: "${ES_PWD}"
+
+
+setup:
+  kibana:
+    host: "{{ kibana_host }}"
+    username: "{{ elasticsearch_user }}"
+    password: "${ES_PWD}"
+  dashboards.enabled: true

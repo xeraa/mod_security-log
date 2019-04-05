@@ -1,0 +1,59 @@
+packetbeat.interfaces.device: any
+
+
+packetbeat.flows:
+  timeout: 30s
+  period: 10s
+
+
+packetbeat.protocols:
+
+- type: icmp
+  enabled: true
+
+- type: dns
+  ports: [53]
+
+- type: http
+  ports: [80, 8080]
+
+- type: tls
+  ports: [443]
+
+- type: mysql
+  ports: [3306]
+
+
+packetbeat.procs:
+  enabled: true
+  monitored:
+    - process: nginx
+      cmdline_grep: nginx
+    - process: mysql-server
+      cmdline_grep: mysql-server
+
+
+name: "{{ inventory_hostname }}"
+tags: ["{{ env }}", "lightsail"]
+
+
+processors:
+- add_cloud_metadata: ~
+- add_host_metadata: ~
+
+
+xpack.monitoring.enabled: true
+
+
+output.elasticsearch:
+  hosts: ["{{ elasticsearch_host }}"]
+  username: "{{ elasticsearch_user }}"
+  password: "${ES_PWD}"
+
+
+setup:
+  kibana:
+    host: "{{ kibana_host }}"
+    username: "{{ elasticsearch_user }}"
+    password: "${ES_PWD}"
+  dashboards.enabled: true

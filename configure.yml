@@ -1,0 +1,342 @@
+- hosts: all
+  remote_user: ubuntu
+  become: true
+  gather_facts: yes
+
+
+  vars_files:
+    - variables.yml
+
+
+  vars:
+      kibana_basic_auth: "{{ attendee_user }}:{{ attendee_password  }}"
+
+
+  pre_tasks:
+    - name: Install Python2 to make Ansible work
+      raw: sudo apt-get update && sudo apt-get -y install python-minimal
+
+
+  tasks:
+
+
+    # System
+    - name: Update and upgrade apt packages
+      apt: upgrade=dist
+
+    - name: Install auditd, which this example is about
+      apt: name=auditd
+
+    - name: Install NTP to avoid time drift and PIP to manage Python dependencies plus its build tools
+      apt:
+        name: [ 'ntp', 'ntpdate', 'python3-pip', 'build-essential', 'libssl-dev', 'libffi-dev', 'whois' ]
+
+    - name: Install the pyOpenSSL library, so Ansible can use it to check TLS certificates
+      pip: name=pyopenssl
+
+
+    # Global Elasticsearch configuration
+    - name: Register a global index template
+      uri:
+        url: "{{elasticsearch_host}}_template/template_global"
+        body_format: json
+        method: PUT
+        user: "{{ elasticsearch_user }}"
+        password: "{{ elasticsearch_password }}"
+        force_basic_auth: true
+        body:
+          template: "*"
+          settings:
+            number_of_shards: 1
+            number_of_replicas: 0
+            refresh_interval: 2s
+        status_code:
+          - 201
+          - 200
+      run_once: true
+
+    - name: Create a role for a user to only view the dashboards
+      uri:
+        url: "{{elasticsearch_host}}.security-6/doc/role-read_dashboard"
+        body_format: json
+        method: PUT
+        user: "{{ elasticsearch_user }}"
+        password: "{{ elasticsearch_password }}"
+        force_basic_auth: true
+        body: "{{ lookup('file','security_role_dashboard.json') }}"
+        status_code:
+          - 201
+          - 200
+
+    - name: Create the dashboard user with the credentials "admin" and "password"
+      uri:
+        url: "{{elasticsearch_host}}.security-6/doc/user-admin"
+        body_format: json
+        method: PUT
+        user: "{{ elasticsearch_user }}"
+        password: "{{ elasticsearch_password }}"
+        force_basic_auth: true
+        body: "{{ lookup('file','security_user_dashboard.json') }}"
+        status_code:
+          - 201
+          - 200
+
+
+    # Beats
+    - name: Stop Auditd since it cannot run in parallel with Auditbeat
+      service: name=auditd state=stopped
+
+    - name: Set the Elasticsearch password for Beats
+      lineinfile:
+        dest: /tmp/cred
+        line: "{{ elasticsearch_password }}"
+        state: present
+        create: yes
+        mode: 0600
+
+    - name: Get the Beats
+      apt: deb={{ elastic_download }}/downloads/beats/{{ item }}/{{ item }}-{{ elastic_version }}-amd64.deb
+      loop:
+      - auditbeat
+      - filebeat
+      - heartbeat
+      - metricbeat
+      - packetbeat
+
+    - name: Change the Beats configuration
+      template: "src=templates/{{ item }}.yml dest=/etc/{{ item }}/{{ item }}.yml"
+      loop:
+      - auditbeat
+      - filebeat
+      - heartbeat
+      - metricbeat
+      - packetbeat
+
+    - name: Create the Beats keystores
+      command: "{{ item }} keystore create --force"
+      loop:
+      - auditbeat
+      - filebeat
+      - heartbeat
+      - metricbeat
+      - packetbeat
+
+    - name: Set the password in the Beats keystore files
+      shell: cat /tmp/cred | {{ item }} keystore add ES_PWD --stdin --force
+      loop:
+      - auditbeat
+      - filebeat
+      - heartbeat
+      - metricbeat
+      - packetbeat
+
+    - name: Remove the password file
+      file:
+        path: /tmp/cred
+        state: absent
+
+    - name: Restart and make sure the Beats autostart
+      service: name={{ item }} state=restarted enabled=yes
+      loop:
+      - auditbeat
+      - filebeat
+      - heartbeat-elastic
+      - metricbeat
+      - packetbeat
+
+    - name: Wait if the Beats are actually running
+      pause: minutes=1
+
+    - name: Get the state of all services and check the status of Auditbeat
+      service_facts: ~
+      failed_when: ansible_facts.services.auditbeat.state != "running"
+
+    - name: Get the state of all services and check the status of Filebeat
+      service_facts: ~
+      failed_when: ansible_facts.services.filebeat.state != "running"
+
+    - name: Get the state of all services and check the status of Heartbeat
+      service_facts: ~
+      failed_when: ansible_facts.services["heartbeat-elastic"].state != "running"
+
+    - name: Get the state of all services and check the status of Metricbeat
+      service_facts: ~
+      failed_when: ansible_facts.services.metricbeat.state != "running"
+
+    - name: Get the state of all services and check the status of Packetbeat
+      service_facts: ~
+      failed_when: ansible_facts.services.packetbeat.state != "running"
+
+
+    # MySQL
+    - name: Install the DEB packages required for Ansible's MySQL modules
+      apt:
+        name: ['python3-dev', 'libmysqlclient-dev']
+
+    - name: Install the Python package required for Ansible's MySQL modules
+      pip: name=mysqlclient
+
+    - name: Install MySQL
+      apt: name=mysql-server
+
+    - name: Removes all anonymous user accounts
+      mysql_user:
+        name: ""
+        host_all: yes
+        state: absent
+
+    - name: Create database user and password with all database privileges
+      mysql_user:
+        name: "{{ mysql_root_user }}"
+        password: "{{ mysql_root_password }}"
+        priv: "*.*:ALL"
+        host: "%"
+        state: present
+
+    - name: Create database user and password with read and insert privileges
+      mysql_user:
+        name: "{{ mysql_user_user }}"
+        password: "{{ mysql_user_password }}"
+        priv: "*.*:INSERT,SELECT"
+        host: "%"
+        state: present
+
+    - name: Restart MySQL and make sure it autostarts
+      service: name=mysql state=restarted enabled=yes
+
+
+    # PHP
+    - name: Install PHP
+      apt:
+        name: ['php-fpm', 'php-mysql']
+
+    - name: Configure PHP
+      lineinfile:
+        dest: "/etc/php/{{ php_version }}/fpm/php.ini"
+        line: "{{ item.key }} = {{ item.value }}"
+        regexp: "^\\s*(;\\s*)?{{ item.key }}"
+      with_items:
+        - { key: 'display_errors', value: 'On' }
+        - { key: 'date.timezone', value: 'Europe/Vienna' }
+
+    - name: Enable the PHP status page
+      lineinfile:
+        dest: "/etc/php/{{ php_version }}/fpm/pool.d/www.conf"
+        regexp: '^;pm.status_path'
+        line: pm.status_path = /status
+
+    - name: Restart PHP and make sure it autostarts
+      service: name="php{{ php_version }}-fpm" state=restarted enabled=yes
+
+
+    # nginx
+    - name: Install nginx
+      apt: name=nginx
+
+    - name: Stop nginx so that Certbot can bind to port 80
+      service: name=nginx state=stopped
+
+    - name: Add the certbot repository
+      apt_repository: repo="ppa:certbot/certbot"
+
+    - name: Install certbot and update the cache for the new PPA
+      apt: name=python-certbot-nginx update_cache=yes
+
+    - name: Add domains to the certificate
+      set_fact:
+        certificates:
+          - "{{ inventory_hostname }}"
+          - "{{ domain }}"
+          - "www.{{ domain }}"
+          - "kibana.{{ domain }}"
+          - "dashboard.{{ domain }}"
+
+    - name: Create the certificate
+      command: >
+        certbot certonly --non-interactive --standalone
+        --agree-tos --email admin@{{ domain }}
+        -d {{ certificates | join(',') }}
+        creates=/etc/letsencrypt/live/{{ inventory_hostname }}/fullchain.pem
+
+    - name: Add crontab to renew certificates every second month on Sunday night
+      cron: minute="30" hour="3" weekday="0" month="*/2" job="service nginx stop && certbot renew >> /var/log//var/log/letsencrypt/renew.log && service nginx start"
+
+    - name: Generate strong dhparams, but only if the file doesn't exist
+      command: openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048 creates=/etc/ssl/certs/dhparam.pem
+
+    - name: Set a global TLS configuration
+      template: src=templates/tls.conf dest=/etc/nginx/tls.conf
+
+    - name: Change the nginx configuration
+      template: src=templates/nginx.conf dest=/etc/nginx/sites-available/default
+
+    - name: Restart nginx and make sure it autostarts
+      service: name=nginx state=restarted enabled=yes
+
+    - name: Check HTTP
+      uri:
+        url: "http://{{ inventory_hostname }}"
+        follow_redirects: none
+        status_code: 301
+      register: response
+      retries: 3
+      delay: 2
+      delegate_to: 127.0.0.1
+      become: false
+
+    - name: Fail if HTTP is not being redirected to HTTPS
+      fail:
+      when: response.status != 301
+
+    - name: Check HTTPS
+      openssl_certificate:
+        path: /etc/letsencrypt/live/{{ inventory_hostname }}/fullchain.pem
+        provider: assertonly
+        issuer:
+          O: Let's Encrypt
+        has_expired: false
+        subject_alt_name:
+          - "DNS:{{ inventory_hostname }}"
+
+    - name: Check HTTPS apex
+      openssl_certificate:
+        path: /etc/letsencrypt/live/{{ inventory_hostname }}/fullchain.pem
+        provider: assertonly
+        issuer:
+          O: Let's Encrypt
+        has_expired: false
+        subject_alt_name:
+          - "DNS:{{ domain }}"
+
+
+    # Apache
+    - name: Install Apache
+      apt: name=apache2
+
+    - name: Install PHP for Apache
+      apt:
+        name: ['php', 'libapache2-mod-php']
+
+    - name: Configure the ports
+      lineinfile:
+        dest: /etc/apache2/ports.conf
+        regexp: '^Listen 80'
+        line: Listen 8080
+
+    - name: Install ModSecurity
+      apt: name=libapache2-mod-security2
+
+    - name: Activate the ModSecurity config
+      copy:
+        src: /etc/modsecurity/modsecurity.conf-recommended
+        dest: /etc/modsecurity/modsecurity.conf
+        remote_src: yes
+
+    - name: Turn On SecRuleEngine rather than DetectionOnly
+      lineinfile:
+        dest: /etc/modsecurity/modsecurity.conf
+        regexp: '^SecRuleEngine'
+        line: SecRuleEngine On
+
+    - name: Restart Apache and make sure it autostarts
+      service: name=apache2 state=restarted enabled=yes

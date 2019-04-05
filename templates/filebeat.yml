@@ -1,0 +1,50 @@
+filebeat.prospectors:
+
+
+filebeat.modules:
+- module: apache2
+- module: auditd
+- module: mysql
+- module: nginx
+- module: system
+
+
+filebeat.prospectors:
+- type: log
+  paths:
+    - /var/log/app.log
+  fields_under_root: true
+  fields:
+    application: app
+- type: log
+  paths:
+    - /var/log/apache2/modsec_audit.log
+  fields_under_root: true
+  fields:
+    application: mod_security
+
+
+name: "{{ inventory_hostname }}"
+tags: ["{{ env }}", "lightsail"]
+
+
+processors:
+- add_cloud_metadata: ~
+- add_host_metadata: ~
+
+
+xpack.monitoring.enabled: true
+
+
+output.elasticsearch:
+  hosts: ["{{ elasticsearch_host }}"]
+  username: "{{ elasticsearch_user }}"
+  password: "${ES_PWD}"
+
+
+setup:
+  kibana:
+    host: "{{ kibana_host }}"
+    username: "{{ elasticsearch_user }}"
+    password: "${ES_PWD}"
+  dashboards.enabled: true

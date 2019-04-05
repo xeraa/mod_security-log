@@ -1,0 +1,61 @@
+- hosts: all
+  remote_user: ubuntu
+  become: true
+  gather_facts: yes
+
+
+  vars_files:
+    - variables.yml
+
+
+  tasks:
+
+    - name: Check if MySQL is accessible
+      wait_for:
+        host: "localhost"
+        port: "{{ item }}"
+        state: started
+        delay: 0
+        timeout: 3
+      with_items:
+        - 3306
+
+    - name: Remove any existing databases
+      mysql_db:
+        name: "{{ mysql_database }}"
+        state: absent
+
+    - name: Copy the MySQL create script
+      copy:
+        src: files/employees.sql
+        dest: /tmp
+
+    - name: Restore the MySQL database
+      mysql_db:
+        name: "{{ mysql_database }}"
+        state: import
+        target: /tmp/employees.sql
+
+    - name: Make sure the log folder exists
+      file:
+        path: "/var/log/app.log"
+        owner: www-data
+        group: www-data
+        state: touch
+        mode: 0644
+
+    - name: Deploy some custom code
+      copy:
+        src: php/
+        dest: /var/www/html/
+        owner: www-data
+        group: www-data
+        mode: 0755
+
+    - name: Configure MySQL through a template
+      template:
+        src: templates/config.php
+        dest: /var/www/html/
+        owner: www-data
+        group: www-data
+        mode: 0755
