@@ -1,4 +1,5 @@
-# Auditd in Action
+# ModSecurity & Logging
+
 
 
 
@@ -8,6 +9,8 @@
 `python sqlmap.py --url "https://xeraa.wtf/read.php?id=1" --purge`
 
 `;INSERT INTO employees (id,name,city,salary) VALUES (4,'test','test',10000)`
+
+`;INSERT INTO employees (id,name,city,salary) VALUES (5,'<script>alert("hello")</script>','evil',0)`
 
 `;DELETE FROM employees WHERE ID=1`
 
