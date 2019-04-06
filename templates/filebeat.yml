@@ -19,6 +19,10 @@ filebeat.prospectors:
 - type: log
   paths:
     - /var/log/apache2/modsec_audit.log
+  multiline:
+    pattern: '--'
+    negate: true
+    match: after
   fields_under_root: true
   fields:
     application: mod_security

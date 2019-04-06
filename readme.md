@@ -30,6 +30,6 @@ When you are done, remove the instances, DNS settings, and key with `terraform d
 
 ## Todo
 
-* Better collection of ModSecurity events
 * Add custom ModSecurity rule
 * Readme
+* Parsing of ModSecurity log (or rather not)?
