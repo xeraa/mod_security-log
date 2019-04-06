@@ -7,7 +7,7 @@ Demo code for the talk [Hands-On ModSecurity and Logging](https://speakerdeck.co
 ## Features
 
 1. Show [https://xeraa.wtf](https://xeraa.wtf) and then specifically [https://xeraa.wtf/read.php?id=1](https://xeraa.wtf/read.php?id=1) — this looks potentially interesting, right?
-1. Validate the suspicion with `python sqlmap.py --url "https://xeraa.wtf/read.php?id=1" --purge`.
+1. Validate the suspicion with `sqlmap --url "https://xeraa.wtf/read.php?id=1" --purge`. This assumes you have installed sqlmap (for example with Homebrew), otherwise download and run it with `python sqlmap.py`.
 1. So this has potential. Quickly show the code with a focus on the string concatenation and `mysqli_multi_query`.
 1. Exploit the bad code by attaching `;INSERT INTO employees (id,name,city,salary) VALUES (4,'test','test',10000)` to [https://xeraa.wtf/read.php?id=1](https://xeraa.wtf/read.php?id=1).
 1. Also we are not escaping the output, so `;INSERT INTO employees (id,name,city,salary) VALUES (5,'<script>alert("hello")</script>','evil',0)` will add more fun to the demo.
@@ -15,7 +15,7 @@ Demo code for the talk [Hands-On ModSecurity and Logging](https://speakerdeck.co
 1. In Kibana show the relevant parts either in Discover or the Log UI by filtering down to `application : "app"`.
 1. Try to `DELETE` or `DROP` data for example with `;DROP TABLE employees`, which doesn't work since our connection only allows `SELECT` or `INSERT`.
 1. Point to [https://xeraa.wtf:8080](https://xeraa.wtf:8080), which is using the same code but runs on Apache and ModSecurity instead of nginx.
-1. Run `python sqlmap.py --url "https://xeraa.wtf:8080/read.php?id=1" --purge`, which results in `403 (Forbidden) - 134 times`.
+1. Run `sqlmap --url "https://xeraa.wtf:8080/read.php?id=1" --purge`, which results in `403 (Forbidden) - 134 times`.
 1. Show the Apache Filebeat dashboard where you can see the blocked requests.
 1. Also show the raw ModSecurity logs by filtering to `application : "mod_security"` and point out that JSON logging is the important configuration here.
 
