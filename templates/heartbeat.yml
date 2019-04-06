@@ -7,7 +7,7 @@ heartbeat.monitors:
   check.response.status: 200
 
 - type: http
-  urls: ["http://{{ domain }}:8080"]
+  urls: ["https://{{ domain }}:8080"]
   schedule: "@every 10s"
   timeout: 3s
   check.response.status: 200
