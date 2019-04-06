@@ -30,7 +30,6 @@ When you are done, remove the instances, DNS settings, and key with `terraform d
 
 ## Todo
 
-* TLS for Apache
 * Better collection of ModSecurity events
 * Check Filebeat, Metricbeat, Packetbeat collection of MySQL, nginx, and Apache
 * Add custom ModSecurity rule
