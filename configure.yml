@@ -335,6 +335,9 @@
     - name: Change the Apache configuration
       template: src=templates/apache.conf dest=/etc/apache2/sites-enabled/000-default.conf
 
+    - name: Enable the Apache status page globally
+      template: src=templates/status.conf dest=/etc/apache2/mods-enabled/status.conf
+
     - name: Install ModSecurity
       apt: name=libapache2-mod-security2
 
