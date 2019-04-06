@@ -353,5 +353,11 @@
         regexp: '^SecRuleEngine'
         line: SecRuleEngine On
 
+    - name: Change the logging format to JSON
+      lineinfile:
+        dest: /etc/modsecurity/modsecurity.conf
+        regexp: '^SecAuditLogFormat'
+        line: SecAuditLogFormat JSON
+
     - name: Restart Apache and make sure it autostarts
       service: name=apache2 state=restarted enabled=yes

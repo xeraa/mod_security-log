@@ -35,4 +35,3 @@ When you are done, remove the instances, DNS settings, and key with `terraform d
 
 * Add custom ModSecurity rule
 * Readme
-* Parsing of ModSecurity log (or rather not)?
