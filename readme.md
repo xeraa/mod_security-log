@@ -38,4 +38,6 @@ When you are done, remove the instances, DNS settings, and key with `terraform d
 
 ## Todo
 
-* Add custom ModSecurity rule
+* Add `' or true -- ` to skip the login form and add it to the flow (probably first)
+* Add custom ModSecurity rule — maybe filter out Shay in POST requests: https://www.digitalocean.com/community/tutorials/how-to-set-up-mod_security-with-apache-on-debian-ubuntu
+* Add sqlmap for the login page: https://github.com/sqlmapproject/sqlmap/wiki/Usage
