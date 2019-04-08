@@ -1,6 +1,3 @@
-filebeat.prospectors:
-
-
 filebeat.modules:
 - module: apache2
 - module: auditd
@@ -9,7 +6,7 @@ filebeat.modules:
 - module: system
 
 
-filebeat.prospectors:
+filebeat.inputs:
 - type: log
   paths:
     - /var/log/app.log
@@ -22,7 +19,6 @@ filebeat.prospectors:
   json:
     keys_under_root: true
     add_error_key: true
-    message_key: message
   fields_under_root: true
   fields:
     application: mod_security
@@ -35,6 +31,16 @@ tags: ["{{ env }}", "lightsail"]
 processors:
 - add_cloud_metadata: ~
 - add_host_metadata: ~
+# Rename the ModSecurity JSON field so it ban be displayed in the Logs UI
+- rename:
+    when:
+      equals:
+        application: mod_security
+    fields:
+     - from: "audit_data.error_messages"
+       to: "message"
+    ignore_missing: true
+    fail_on_error: false
 
 
 xpack.monitoring.enabled: true
