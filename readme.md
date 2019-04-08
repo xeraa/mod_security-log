@@ -9,7 +9,7 @@ Demo code for the talk [Hands-On ModSecurity and Logging](https://speakerdeck.co
 1. Show [https://xeraa.wtf](https://xeraa.wtf) and then specifically [https://xeraa.wtf/read.php?id=1](https://xeraa.wtf/read.php?id=1) — this looks potentially interesting, right?
 1. Validate the suspicion with `sqlmap --url "https://xeraa.wtf/read.php?id=1" --purge`. This assumes you have installed sqlmap (for example with Homebrew), otherwise download and run it with `python sqlmap.py`.
 1. So this has potential. Quickly show the code with a focus on the string concatenation and `mysqli_multi_query`.
-1. Exploit the bad code by attaching `;INSERT INTO employees (id,name,city,salary) VALUES (4,'test','test',10000)` to [https://xeraa.wtf/read.php?id=1](https://xeraa.wtf/read.php?id=1).
+1. Exploit the bad code by attaching `;INSERT INTO employees (name) VALUES ('Philipp')` to [https://xeraa.wtf/read.php?id=1](https://xeraa.wtf/read.php?id=1).
 1. Also we are not escaping the output, so `;INSERT INTO employees (id,name,city,salary) VALUES (5,'<script>alert("hello")</script>','evil',0)` will add more fun to the demo.
 1. Dive into the logging by showing */var/log/app.log* and then how Filebeat is collecting this information.
 1. In Kibana show the relevant parts either in Discover or the Log UI by filtering down to `application : "app"`.
