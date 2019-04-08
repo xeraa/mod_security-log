@@ -6,8 +6,7 @@ if(isset($_GET["id"]) && !empty(trim($_GET["id"]))){
 
     // Prepare the database query
     $sql = "SELECT * FROM employees WHERE id = " . trim($_GET["id"]);
-    error_log("SQL query: " . $sql . "\n", 3, "/var/log/app.log");
-
+    error_log("SQL query [read.php]: " . $sql . "\n", 3, "/var/log/app.log");
 
     // Run the query and use the result
     mysqli_multi_query($link, $sql);

@@ -31,6 +31,7 @@
                 <div class="col-md-12">
                     <div class="page-header clearfix">
                         <h2 class="pull-left">Elastic Employees</h2>
+                        <a href="create.php" class="btn btn-success pull-right">Add a new Elastic employee</a>
                     </div>
                     <?php
                     // Include config file
