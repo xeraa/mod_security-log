@@ -216,7 +216,7 @@
         line: "{{ item.key }} = {{ item.value }}"
         regexp: "^\\s*(;\\s*)?{{ item.key }}"
       with_items:
-        - { key: 'display_errors', value: 'On' }
+        - { key: 'display_errors', value: 'Off' }
         - { key: 'date.timezone', value: 'Europe/Vienna' }
 
     - name: Enable the PHP status page
