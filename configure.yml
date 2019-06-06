@@ -359,5 +359,10 @@
         regexp: '^SecAuditLogFormat'
         line: SecAuditLogFormat JSON
 
+    - name: Remove the default index page so we can use our own code
+      file:
+        path: /var/www/html/index.html
+        state: absent
+
     - name: Restart Apache and make sure it autostarts
       service: name=apache2 state=restarted enabled=yes
