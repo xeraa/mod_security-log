@@ -36,9 +36,4 @@ output.elasticsearch:
   password: "${ES_PWD}"
 
 
-setup:
-  kibana:
-    host: "{{ kibana_host }}"
-    username: "{{ elasticsearch_user }}"
-    password: "${ES_PWD}"
-  dashboards.enabled: true
+# No setup because the Uptime Monitoring is already built into Kibana
