@@ -6,11 +6,12 @@ Demo code for the talk [Hands-On ModSecurity and Logging](https://speakerdeck.co
 
 ## Features
 
-1. Show [https://xeraa.wtf](https://xeraa.wtf) and then specifically [https://xeraa.wtf/read.php?id=1](https://xeraa.wtf/read.php?id=1) — this looks potentially interesting, right?
+1. Show [https://xeraa.wtf](https://xeraa.wtf) and then focus on the login form [](). After a successful login, try it with `' or true -- ` and a random password to skip the login form.
+1. Let's look at [https://xeraa.wtf/read.php?id=1](https://xeraa.wtf/read.php?id=1) — this looks potentially interesting, right?
 1. Validate the suspicion with `sqlmap --url "https://xeraa.wtf/read.php?id=1" --purge`. This assumes you have installed sqlmap (for example with Homebrew), otherwise download and run it with `python sqlmap.py`.
 1. So this has potential. Quickly show the code with a focus on the string concatenation and `mysqli_multi_query`.
-1. Exploit the bad code by attaching `;INSERT INTO employees (name) VALUES ('Philipp')` to [https://xeraa.wtf/read.php?id=1](https://xeraa.wtf/read.php?id=1).
-1. Also we are not escaping the output, so `;INSERT INTO employees (id,name,city,salary) VALUES (5,'<script>alert("hello")</script>','evil',0)` will add more fun to the demo.
+1. Exploit the bad code by attaching `;INSERT INTO employees (name) VALUES ('Bad Actor')` to [https://xeraa.wtf/read.php?id=1](https://xeraa.wtf/read.php?id=1).
+1. Also we are not escaping the output, so `;INSERT INTO employees (name) VALUES ('<script>alert("Hello Friend")</script>')` will add more fun to the demo.
 1. Dive into the logging by showing */var/log/app.log* and then how Filebeat is collecting this information.
 1. In Kibana show the relevant parts either in Discover or the Log UI by filtering down to `application : "app"`.
 1. Try to `DELETE` or `DROP` data for example with `;DROP TABLE employees`, which doesn't work since our connection only allows `SELECT` or `INSERT`.
@@ -38,6 +39,5 @@ When you are done, remove the instances, DNS settings, and key with `terraform d
 
 ## Todo
 
-* Add `' or true -- ` to skip the login form and add it to the flow (probably first)
 * Add custom ModSecurity rule — maybe filter out Shay in POST requests: https://www.digitalocean.com/community/tutorials/how-to-set-up-mod_security-with-apache-on-debian-ubuntu
-* Add sqlmap for the login page: https://github.com/sqlmapproject/sqlmap/wiki/Usage
+* Add cookie trickery
