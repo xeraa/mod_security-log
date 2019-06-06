@@ -6,7 +6,7 @@ Demo code for the talk [Hands-On ModSecurity and Logging](https://speakerdeck.co
 
 ## Features
 
-1. Show [https://xeraa.wtf](https://xeraa.wtf) and then focus on the login form [](). After a successful login, try it with `' or true -- ` and a random password to skip the login form.
+1. Show [https://xeraa.wtf](https://xeraa.wtf) and then focus on the login form [https://xeraa.wtf/login.php](https://xeraa.wtf/login.php). After a successful login, try it with `' or true -- ` and a random password to skip the login form.
 1. Let's look at [https://xeraa.wtf/read.php?id=1](https://xeraa.wtf/read.php?id=1) — this looks potentially interesting, right?
 1. Validate the suspicion with `sqlmap --url "https://xeraa.wtf/read.php?id=1" --purge`. This assumes you have installed sqlmap (for example with Homebrew), otherwise download and run it with `python sqlmap.py`.
 1. So this has potential. Quickly show the code with a focus on the string concatenation and `mysqli_multi_query`.
