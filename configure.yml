@@ -359,6 +359,9 @@
         regexp: '^SecAuditLogFormat'
         line: SecAuditLogFormat JSON
 
+    - name: Add a custom mod_security rule
+      template: src=templates/modsecurity_custom_rules.conf dest=/etc/modsecurity/modsecurity_custom_rules.conf
+
     - name: Remove the default index page so we can use our own code
       file:
         path: /var/www/html/index.html

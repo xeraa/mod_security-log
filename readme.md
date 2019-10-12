@@ -19,6 +19,7 @@ Demo code for the talk [Hands-On ModSecurity and Logging](https://speakerdeck.co
 1. Run `sqlmap --url "https://xeraa.wtf:8080/read.php?id=1" --purge`, which results in `403 (Forbidden) - 134 times`.
 1. Show the Apache Filebeat dashboard where you can see the blocked requests.
 1. Also show the raw ModSecurity logs by filtering to `application : "mod_security"` and point out that JSON logging is the important configuration here as well as the `rename` to the `message` field.
+1. Show the custom rule in action by trying to add someone called `Shay Banon` or just `Shay` and show the log message.
 
 
 
@@ -39,5 +40,4 @@ When you are done, remove the instances, DNS settings, and key with `terraform d
 
 ## Todo
 
-* Add custom ModSecurity rule — maybe filter out Shay in POST requests: https://www.digitalocean.com/community/tutorials/how-to-set-up-mod_security-with-apache-on-debian-ubuntu
-* Add cookie trickery
+* Add cookie trickery?
