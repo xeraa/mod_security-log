@@ -20,6 +20,7 @@ Demo code for the talk [Hands-On ModSecurity and Logging](https://speakerdeck.co
 1. Show the Apache Filebeat dashboard where you can see the blocked requests.
 1. Also show the raw ModSecurity logs by filtering to `application : "mod_security"` and point out that JSON logging is the important configuration here as well as the `rename` to the `message` field.
 1. Show the custom rule in action by trying to add someone called `Shay Banon` or just `Shay` and show the log message.
+1. But this isn't fully fool proof. For example `'(Or)1=1()` still allows you to skip the login form.
 
 
 
