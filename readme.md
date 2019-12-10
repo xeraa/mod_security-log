@@ -41,4 +41,5 @@ When you are done, remove the instances, DNS settings, and key with `terraform d
 
 ## Todo
 
+* Add file inclusion (local or remote) trickery?
 * Add cookie trickery?
