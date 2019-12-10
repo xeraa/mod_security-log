@@ -57,6 +57,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         if($stmt = mysqli_prepare($link, $sql)){
             // Bind variables to the prepared statement as parameters
             mysqli_stmt_bind_param($stmt, "ssis", $param_name, $param_city, $param_salary, $param_password);
+            error_log("SQL query [create.php] parameters: name='${name}', city='${city}', salary='${salary}', password='${password}'\n", 3, "/var/log/app.log");
 
             // Set parameters
             $param_name = $name;
