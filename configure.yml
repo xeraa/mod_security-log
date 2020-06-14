@@ -192,6 +192,7 @@
         name: ""
         host_all: yes
         state: absent
+      no_log: true
 
     - name: Create database user and password with all database privileges
       mysql_user:
@@ -200,6 +201,7 @@
         priv: "*.*:ALL"
         host: "%"
         state: present
+      no_log: true
 
     - name: Create database user and password with read and insert privileges
       mysql_user:
@@ -208,6 +210,7 @@
         priv: "*.*:INSERT,SELECT"
         host: "%"
         state: present
+      no_log: true
 
     - name: Restart MySQL and make sure it autostarts
       service: name=mysql state=restarted enabled=yes
@@ -269,9 +272,9 @@
     - name: Add crontab to renew certificates every second month on Sunday night
       cron:
         name: Refresh the certificate
-        minute: 30
-        hour: 3
-        weekday: 0
+        minute: "30"
+        hour: "3"
+        weekday: "0"
         month: "*/2"
         job: service nginx stop && certbot renew >> /var/log//var/log/letsencrypt/renew.log && service nginx start
 
@@ -302,25 +305,17 @@
       fail:
       when: response.status != 301
 
-    - name: Check HTTPS
-      openssl_certificate:
+    - name: Get HTTPS
+      openssl_certificate_info:
         path: /etc/letsencrypt/live/{{ inventory_hostname }}/fullchain.pem
-        provider: assertonly
-        issuer:
-          O: Let's Encrypt
-        has_expired: false
-        subject_alt_name:
-          - "DNS:{{ inventory_hostname }}"
+        valid_at:
+          point_1: "+1w"
+      register: apex
 
-    - name: Check HTTPS apex
-      openssl_certificate:
-        path: /etc/letsencrypt/live/{{ inventory_hostname }}/fullchain.pem
-        provider: assertonly
-        issuer:
-          O: Let's Encrypt
-        has_expired: false
-        subject_alt_name:
-          - "DNS:{{ domain }}"
+    - name: Check HTTPS
+      assert:
+        that:
+          - apex.valid_at.point_1
 
 
     # Apache
