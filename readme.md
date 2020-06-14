@@ -1,6 +1,6 @@
 # ModSecurity & Logging
 
-Demo code for the talk [Hands-On ModSecurity and Logging](https://speakerdeck.com/xeraa/hands-on-modsecurity-and-logging). **This is insecure and generally bad code — only use it for demos and education on what not to do.**
+Demo code for the talk [Hands-On ModSecurity and Logging](https://xeraa.net/talks/secure-your-code-injections-and-logging/). **This is insecure and generally bad code — only use it for demos and education on what not to do.**
 
 
 
