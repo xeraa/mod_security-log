@@ -1,6 +1,5 @@
 auditbeat.modules:
 
-
 - module: auditd
   resolve_ids: true
   failure_mode: silent
@@ -18,7 +17,6 @@ auditbeat.modules:
     ## For a full list of system calls see /usr/include/x86_64-linux-gnu/asm/unistd_64.h.
     ## Add a keyword (-k) to the log event.
 
-
 - module: system
   datasets:
     - host
@@ -28,13 +26,11 @@ auditbeat.modules:
   period: 1m
   user.detect_password_changes: true
 
-
 - module: system
   datasets:
     - process
     - socket
   period: 2s
-
 
 - module: file_integrity
   paths:
@@ -57,7 +53,7 @@ processors:
 - add_host_metadata: ~
 
 
-xpack.monitoring.enabled: true
+monitoring.enabled: true
 
 
 output.elasticsearch:

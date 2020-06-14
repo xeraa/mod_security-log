@@ -43,7 +43,7 @@ processors:
     fail_on_error: false
 
 
-xpack.monitoring.enabled: true
+monitoring.enabled: true
 
 
 output.elasticsearch:
