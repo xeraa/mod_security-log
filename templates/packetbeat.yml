@@ -57,3 +57,4 @@ setup:
     username: "{{ elasticsearch_user }}"
     password: "${ES_PWD}"
   dashboards.enabled: true
+  ilm.overwrite: true
