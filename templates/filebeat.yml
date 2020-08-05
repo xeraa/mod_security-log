@@ -31,7 +31,7 @@ tags: ["{{ env }}", "lightsail"]
 processors:
 - add_cloud_metadata: ~
 - add_host_metadata: ~
-# Rename the ModSecurity JSON field so it ban be displayed in the Logs UI
+# Rename the ModSecurity JSON field so it can be displayed in the Logs UI
 - rename:
     when:
       equals:
