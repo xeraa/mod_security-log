@@ -17,7 +17,7 @@
 
     # System
     - name: Update and upgrade apt packages
-      apt: upgrade=dist
+      apt: upgrade=dist force_apt_get=yes update_cache=yes
 
     - name: Install NTP to avoid time drift and PIP to manage Python dependencies plus its build tools
       apt:
