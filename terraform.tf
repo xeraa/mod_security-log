@@ -38,25 +38,3 @@ resource "aws_route53_record" "www" {
   }
   depends_on = [aws_route53_record.apex]
 }
-resource "aws_route53_record" "kibana" {
-  zone_id = var.zone_id
-  name    = "kibana.${var.domain}"
-  type    = "A"
-  alias {
-    name                   = var.domain
-    zone_id                = var.zone_id
-    evaluate_target_health = false
-  }
-  depends_on = [aws_route53_record.apex]
-}
-resource "aws_route53_record" "dashboard" {
-  zone_id = var.zone_id
-  name    = "dashboard.${var.domain}"
-  type    = "A"
-  alias {
-    name                   = var.domain
-    zone_id                = var.zone_id
-    evaluate_target_health = false
-  }
-  depends_on = [aws_route53_record.apex]
-}
